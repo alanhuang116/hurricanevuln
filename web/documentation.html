@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HurricaneVuln Documentation</title>
+<meta name="description" content="Technical documentation for HurricaneVuln: data sources, data dictionary, processing pipeline, wind field, fragility and household loss models, validation and fitted parameters.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#FBFBFD; --bg-alt:#F5F5F7; --card:#FFFFFF; --ink:#1D1D1F; --ink-2:#515154; --ink-3:#86868B;
+  --line:#D2D2D7; --line-2:#E8E8ED; --accent:#0071E3; --accent-ink:#0066CC; --accent-wash:rgba(0,113,227,.07);
+  --good:#1D8A4E; --warn:#B25E00; --bad:#D70015; --code:#F2F2F5;
+  --c0:#BFD9F7; --c1:#F3D35B; --c2:#F2A33A; --c3:#EC6A2F; --c4:#D52943; --c5:#8B1D5E;
+  --shadow:0 2px 6px rgba(0,0,0,.04), 0 18px 40px -24px rgba(0,0,0,.2);
+  --f:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#000000; --bg-alt:#0C0C0E; --card:#161618; --ink:#F5F5F7; --ink-2:#C7C7CC; --ink-3:#8A8A8F;
+    --line:#38383A; --line-2:#262628; --accent:#2997FF; --accent-ink:#4AA8FF; --accent-wash:rgba(41,151,255,.12);
+    --good:#32C26A; --warn:#FF9F0A; --bad:#FF453A; --code:#1C1C1E;
+    --c0:#3A6EA8; --c1:#E9C440; --c2:#F2992E; --c3:#F06A30; --c4:#FF4D5E; --c5:#D25AA0;
+    --shadow:0 2px 6px rgba(0,0,0,.4), 0 22px 46px -24px rgba(0,0,0,.9);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#000000; --bg-alt:#0C0C0E; --card:#161618; --ink:#F5F5F7; --ink-2:#C7C7CC; --ink-3:#8A8A8F;
+  --line:#38383A; --line-2:#262628; --accent:#2997FF; --accent-ink:#4AA8FF; --accent-wash:rgba(41,151,255,.12);
+  --good:#32C26A; --warn:#FF9F0A; --bad:#FF453A; --code:#1C1C1E;
+  --c0:#3A6EA8; --c1:#E9C440; --c2:#F2992E; --c3:#F06A30; --c4:#FF4D5E; --c5:#D25AA0;
+  --shadow:0 2px 6px rgba(0,0,0,.4), 0 22px 46px -24px rgba(0,0,0,.9);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:72px; -webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--f); font-size:17px; line-height:1.65; letter-spacing:-.008em; -webkit-font-smoothing:antialiased; overflow-x:hidden}
+h1,h2,h3,h4{margin:0; letter-spacing:-.022em; line-height:1.15; text-wrap:balance}
+a{color:var(--accent-ink); text-decoration:none} a:hover{text-decoration:underline}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px; border-radius:6px}
+.wrap{max-width:1200px; margin:0 auto; padding-inline:max(20px, env(safe-area-inset-left))}
+.nav{position:sticky; top:env(safe-area-inset-top,0px); z-index:100; height:52px; background:color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:saturate(180%) blur(20px); border-bottom:1px solid color-mix(in srgb, var(--line) 60%, transparent)}
+.nav .wrap{display:flex; align-items:center; gap:24px; height:100%}
+.brand{font-weight:600; font-size:19px; letter-spacing:-.02em; color:var(--ink); display:flex; align-items:center; gap:9px}
+.brand:hover{text-decoration:none}
+.brand svg{width:20px; height:20px}
+.brand small{font-weight:500; color:var(--ink-3); font-size:15px}
+.nav .sp{margin-left:auto}
+.nav a.nl{font-size:13px; color:var(--ink-2)}
+.pillbtn{font-size:13px; font-weight:500; border-radius:980px; padding:5px 12px; border:1px solid var(--line); background:transparent; color:var(--ink-2); cursor:pointer; font-family:inherit}
+
+.head{padding:72px 0 40px; border-bottom:1px solid var(--line-2)}
+.head p.k{font-size:17px; font-weight:600; color:var(--accent-ink)}
+.head h1{font-size:clamp(38px,5.4vw,60px); letter-spacing:-.035em; margin-top:10px}
+.head .lede{font-size:clamp(18px,1.6vw,21px); color:var(--ink-2); margin-top:16px; max-width:760px; line-height:1.5}
+.meta{display:flex; flex-wrap:wrap; gap:10px 28px; margin-top:26px; font-size:14px; color:var(--ink-3)}
+.meta b{color:var(--ink); font-weight:600}
+
+.layout{display:grid; gap:48px; padding:48px 0 96px}
+@media(min-width:1100px){ .layout{grid-template-columns:240px minmax(0,1fr)} }
+.toc{display:none}
+@media(min-width:1100px){ .toc{display:block; position:sticky; top:76px; align-self:start; max-height:calc(100vh - 96px); overflow:auto; font-size:13.5px; padding-right:8px} }
+.toc a{display:block; color:var(--ink-2); padding:4px 0 4px 12px; border-left:2px solid transparent; line-height:1.35}
+.toc a.sub{padding-left:24px; font-size:13px; color:var(--ink-3)}
+.toc a:hover{color:var(--ink); text-decoration:none}
+.toc a.on{color:var(--accent-ink); border-left-color:var(--accent); font-weight:500}
+article{max-width:860px; min-width:0}
+article section{padding-top:8px; margin-bottom:64px}
+article h2{font-size:32px; letter-spacing:-.03em; padding-top:8px}
+article h2 .n{color:var(--ink-3); font-weight:600; margin-right:10px}
+article h3{font-size:22px; margin-top:38px}
+article h4{font-size:17px; margin-top:26px}
+article p, article li{color:var(--ink-2); max-width:76ch}
+article p{margin:14px 0 0}
+article ul, article ol{margin:12px 0 0; padding-left:22px; display:grid; gap:6px}
+article strong{color:var(--ink); font-weight:600}
+code{font-family:var(--f-mono); font-size:.86em; background:var(--code); padding:2px 6px; border-radius:6px; color:var(--ink)}
+pre{margin:16px 0 0; background:var(--code); border-radius:14px; padding:16px 18px; font-family:var(--f-mono); font-size:13px; line-height:1.7; overflow-x:auto; color:var(--ink)}
+.eq{margin:18px 0 0; padding:14px 18px; background:var(--card); border-radius:14px; box-shadow:var(--shadow); overflow-x:auto}
+.callout{margin:18px 0 0; border-radius:16px; padding:16px 20px; background:var(--accent-wash); color:var(--ink-2); font-size:15.5px}
+.callout b{color:var(--ink)}
+.card{margin:20px 0 0; background:var(--card); border-radius:20px; box-shadow:var(--shadow); padding:22px 24px}
+.card h4{margin-top:0; font-size:19px}
+.card dl{display:grid; grid-template-columns:150px 1fr; gap:8px 18px; margin:14px 0 0; font-size:14.5px}
+.card dt{color:var(--ink-3)} .card dd{margin:0; color:var(--ink); word-break:break-word}
+@media(max-width:620px){ .card dl{grid-template-columns:1fr} .card dd{margin-bottom:6px} }
+.hash{font-family:var(--f-mono); font-size:11.5px; color:var(--ink-3); word-break:break-all}
+.scroll-x{overflow-x:auto; -webkit-overflow-scrolling:touch; margin-top:16px}
+.tbl{width:100%; border-collapse:collapse; font-size:14px}
+.tbl th{font-size:12.5px; font-weight:600; color:var(--ink-3); text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); white-space:nowrap}
+.tbl td{padding:9px 10px; border-bottom:1px solid var(--line-2); vertical-align:top; color:var(--ink)}
+.tbl td.n,.tbl th.n{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap}
+.tbl td.m{font-family:var(--f-mono); font-size:12.5px}
+.tbl td small{color:var(--ink-3)}
+.tbl tr.hl td{background:var(--accent-wash)}
+.pill{display:inline-block; font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:980px; background:var(--bg-alt); color:var(--ink-2)}
+.pill.ok{color:var(--good)} .pill.no{color:var(--ink-3)}
+.diagram{margin:20px 0 0; background:var(--card); border-radius:20px; box-shadow:var(--shadow); padding:18px; overflow-x:auto}
+.diagram svg{display:block; min-width:720px; width:100%; height:auto}
+.diagram text{font-family:var(--f); fill:var(--ink)}
+.parity{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-top:16px}
+.parity div{background:var(--card); border-radius:16px; box-shadow:var(--shadow); padding:16px}
+.parity b{display:block; font-size:24px; letter-spacing:-.03em}
+.parity span{font-size:13px; color:var(--ink-3)}
+footer{border-top:1px solid var(--line); padding:32px 0 56px; color:var(--ink-3); font-size:12.5px}
+.katex{font-size:1.06em}
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="Documentation">
+  <div class="wrap">
+    <a class="brand" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.5c-1.9 0-3.6.6-5 1.6 3.4-.6 6.6.8 7.5 3.7A5.5 5.5 0 0 1 12 17.5c-1.6 0-3-.7-4-1.8.6 3.5 3.3 6 6.7 5.7 1.4-.1 2.7-.6 3.8-1.4-3.4.5-6.4-1-7.2-3.8A5.5 5.5 0 0 1 12 6.5c1.6 0 3 .7 4 1.8C15.4 4.9 13.6 2.5 12 2.5Zm0 7.3a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 0 0 0-4.4Z"/></svg>HurricaneVuln <small>Documentation</small></a>
+    <span class="sp"></span>
+    <a class="nl" href="index.html">Back to the Product</a>
+    <button class="pillbtn" id="theme" type="button" aria-label="Switch colour theme">Dark</button>
+  </div>
+</nav>
+
+<header class="head">
+  <div class="wrap">
+    <p class="k">Technical Documentation</p>
+    <h1>How HurricaneVuln Is Built</h1>
+    <p class="lede">The data behind every number, where each file comes from, how it is cleaned and joined, the wind-field and statistical algorithms, how the models are validated, and every fitted parameter. Figures on this page are read from the same build as the product, so they cannot drift apart.</p>
+    <div class="meta"><span>Version <b data-k="version"></b></span><span>Built <b data-k="built"></b></span><span>Best-track file <b data-k="hurdat"></b></span><span>Buildings <b data-k="n_buildings"></b></span><span>Households <b data-k="n_households"></b></span><span>Storms <b data-k="n_storms"></b></span></div>
+  </div>
+</header>
+
+<div class="wrap layout">
+<nav class="toc" id="toc" aria-label="Contents"></nav>
+<article id="doc">
+
+<section id="overview">
+<h2><span class="n">1</span>Overview</h2>
+<p>HurricaneVuln answers two questions for a single building and a single storm. <strong>Will the building be damaged, or destroyed?</strong> That is the fragility model, fitted at building level to Hurricane Michael. <strong>When a home is damaged, what does it cost to repair?</strong> That is the household loss model, fitted to FEMA inspections across <span data-k="n_storms"></span> storms. Both take the same input, the peak sustained wind at the building, which a parametric wind field computes from the official best track.</p>
+<p>The product is a vulnerability component. It does not simulate where storms go or how often; that belongs to a hazard model or an event set. Given a wind at a building, HurricaneVuln returns probabilities and loss distributions, each with an uncertainty range.</p>
+<div class="diagram" role="img" aria-label="System architecture: data sources feed a wind field, a fragility table and a household loss table; models produce building-level outputs">
+<svg viewBox="0 0 980 420" id="arch"></svg>
+</div>
+<h3>Outputs</h3>
+<div class="scroll-x"><table class="tbl" id="outputs"></table></div>
+</section>
+
+<section id="sources">
+<h2><span class="n">2</span>Data Sources</h2>
+<p>Eight public sources. Each is retrieved by a script in <code>scripts/</code>, and <code>data/raw/manifest.json</code> records the URL, the retrieval time and the SHA-256 digest of the file as downloaded. Re-running a fetch script and comparing digests shows whether a provider has changed the data since this build.</p>
+<div id="sourcecards"></div>
+</section>
+
+<section id="dictionary">
+<h2><span class="n">3</span>Data Dictionary</h2>
+<p>The two analysis tables the models are fitted to. Types are as stored after processing; distributions are computed on the full table in this build.</p>
+<h3 id="dict-fragility">3.1 Fragility Table</h3>
+<p>One row per building in Hurricane Michael's assessed footprint. File: <code>data/processed/fragility.csv</code>, built by <code>scripts/build_fragility.py</code>.</p>
+<div class="scroll-x"><table class="tbl" id="dict-frag"></table></div>
+<h3 id="dict-loss">3.2 Household Loss Table</h3>
+<p>One row per owner-occupied primary residence that registered with FEMA and received an inspection. File: <code>data/processed/household_loss.csv</code>, built by <code>scripts/build_loss.py</code>.</p>
+<div class="scroll-x"><table class="tbl" id="dict-loss-t"></table></div>
+<h3 id="dict-levels">3.3 Category Levels</h3>
+<p>Counts of every level of every categorical field.</p>
+<div id="levels"></div>
+</section>
+
+<section id="pipeline">
+<h2><span class="n">4</span>Processing Pipeline</h2>
+<h3 id="pipe-fragility">4.1 Building the Fragility Table</h3>
+<ol>
+<li><strong>Assessed tiles.</strong> FEMA's remote-sensing wind points for Hurricane Michael are binned into 0.1° tiles. A tile is assessed if it holds at least 5 points. Every NSI structure in an assessed tile is pulled from the NSI API by bounding polygon.</li>
+<li><strong>One record per building.</strong> NSI repeats a footprint once per occupancy inside it. Records are de-duplicated on the NSI building identifier <code>bid</code>, keeping the record with the highest structure value.</li>
+<li><strong>Damage labels.</strong> Buildings and FEMA points are projected to a local equirectangular plane (metres). A k-d tree finds, for each FEMA point, the nearest building; matches within 30 m are kept. Each building takes the most severe state among its matched points: affected or minor map to 1, major or destroyed to 2. Buildings with no matched point are labelled 0, no visible damage (assumption A-01).</li>
+<li><strong>Wind.</strong> The peak sustained wind of Michael's track is computed at every building (section 5).</li>
+<li><strong>County.</strong> Each building takes the county of the nearest 2020 block-group population centre.</li>
+<li><strong>Parcel attributes.</strong> Florida buildings are placed in their parcel polygon with a spatial index (STR-tree, point-in-polygon). The parcel supplies actual year built, land-use code, construction class and quality grade. Where the parcel gives a construction class, it replaces NSI's.</li>
+<li><strong>Post-storm rule.</strong> The roll is the 2026 roll. A building whose parcel shows an actual year built of 2019 or later and has a damage point is a rebuild: it keeps its outcome and its attributes are set to unknown. One with no damage point did not exist when Michael struck and is removed (assumption A-04).</li>
+</ol>
+<div class="scroll-x"><table class="tbl" id="qa-frag"></table></div>
+<p id="match-note"></p>
+<h3 id="pipe-loss">4.2 Building the Household Loss Table</h3>
+<ol>
+<li><strong>Registrations.</strong> For each disaster declaration, OpenFEMA is queried for owner registrations with a returned inspection (<code>ownRent eq 'O' and inspnReturned eq true</code>). Rows are ordered by <code>id</code>, a random UUID, so a pull capped at 60,000 per declaration is a simple random sample of it.</li>
+<li><strong>Admissibility.</strong> Primary residences with a 12-character block-group GEOID are kept.</li>
+<li><strong>Location.</strong> Each household is placed at its block group's population centre, using the 2010 or 2020 centre file as its <code>censusYear</code> says.</li>
+<li><strong>Wind.</strong> The storm's peak sustained wind is computed once per block group and assigned to every household in it.</li>
+<li><strong>Dollars.</strong> Verified real property loss and roof damage amount are multiplied by CPI-U(2024) / CPI-U(storm year).</li>
+<li><strong>Flood.</strong> A household is flooded if FEMA recorded flood damage or a water level above zero. Water level is in inches above the floor.</li>
+</ol>
+<div class="scroll-x"><table class="tbl" id="qa-loss"></table></div>
+<h4>Registrations by Disaster Declaration</h4>
+<div class="scroll-x"><table class="tbl" id="ihp"></table></div>
+<h4>Consumer Price Index Used</h4>
+<div class="scroll-x"><table class="tbl" id="cpi"></table></div>
+</section>
+
+<section id="wind">
+<h2><span class="n">5</span>Wind Field</h2>
+<p>A parametric field turns the best track into a peak wind at any location. It is a Holland (1980) radial profile, scaled so its maximum equals the best-track intensity, with the forward motion added on the right of the track.</p>
+<h3 id="wind-track">5.1 Track Interpolation</h3>
+<p>Best-track records are linearly interpolated in time to a 15-minute grid. Records off the 6-hour cycle, such as landfalls, are used as interpolation knots. The radius of maximum wind is interpolated only between records that carry one; elsewhere it is missing. Forward speed and heading come from central differences of the interpolated positions:</p>
+<div class="eq">$$\Delta y_i=\tfrac12(\phi_{i+1}-\phi_{i-1})R_E,\qquad \Delta x_i=\tfrac12(\lambda_{i+1}-\lambda_{i-1})R_E\cos\phi_i$$
+$$V_{t,i}=\frac{\sqrt{\Delta x_i^2+\Delta y_i^2}}{\Delta t},\qquad \theta_i=\operatorname{atan2}(\Delta x_i,\Delta y_i)$$</div>
+<p>with latitude \(\phi\) and longitude \(\lambda\) in radians, \(R_E=6371\) km and \(\Delta t=900\) s. One-sided differences are used at the ends of the track.</p>
+<h3 id="wind-profile">5.2 Radial Profile</h3>
+<div class="eq">$$S(r)=\sqrt{\left(\frac{R_m}{r}\right)^{B}\exp\!\left[1-\left(\frac{R_m}{r}\right)^{B}\right]},\qquad S(R_m)=1$$</div>
+<p>The radius of maximum wind \(R_m\) is the best-track value when HURDAT2 has one (from 2021, and in reanalysed records), converted from nautical miles. Otherwise it follows Willoughby, Darling and Rahn (2006):</p>
+<div class="eq">$$R_m\,[\text{km}]=46.4\,\exp\left(-0.0155\,V_{\max}+0.0169\,|\phi|\right)$$</div>
+<p>with \(V_{\max}\) in m/s and \(\phi\) in degrees. The shape parameter follows Vickery and Wadhera (2008), clipped to \([0.8,\,2.2]\):</p>
+<div class="eq">$$B=1.881-0.00557\,R_m-0.01097\,|\phi|$$</div>
+<h3 id="wind-asym">5.3 Asymmetry and Peak Wind</h3>
+<p>The best-track intensity includes the storm's motion. Half the forward speed is removed to get the symmetric part, and added back as a cosine of the bearing from the centre, peaking 90° to the right of the heading:</p>
+<div class="eq">$$V_{\text{sym}}=\max\!\left(V_{\max}-\tfrac12V_t,\,0\right)$$
+$$V(r,\psi)=\left[V_{\text{sym}}+\tfrac12V_t\cos\!\left(\psi-\theta-\tfrac{\pi}{2}\right)\right]S(r)$$
+$$V_{\text{peak}}(x)=\max_{i}V\!\left(r_i(x),\psi_i(x)\right)$$</div>
+<p>Here \(\psi\) is the bearing from the centre to the site, clockwise from north. Distances use the local equirectangular approximation with \(\cos\phi\) of the track point; \(r\) is floored at 0.5 km. In the browser, steps farther than 900 km from the site are skipped, where \(S\) is negligible. The result is a peak 1-minute sustained wind at 10 m in open terrain, the same reference as the best track.</p>
+<h3 id="wind-check">5.4 Check Against FEMA's Wind Classes</h3>
+<p>FEMA labels each Michael damage point with a wind class. The modelled wind at those points rises with FEMA's class, and runs about one category higher. That is consistent with ground roughness, which FEMA's classes evidently include and an open-terrain reference does not.</p>
+<div class="scroll-x"><table class="tbl" id="windcheck"></table></div>
+</section>
+
+<section id="fragility">
+<h2><span class="n">6</span>Building Fragility Model</h2>
+<h3 id="frag-form">6.1 Model Form</h3>
+<p>Two logistic stages, both with a partially pooled effect for the assessment county \(c\):</p>
+<div class="eq">$$\Pr(D\ge 1\mid x)=\sigma\!\left(\mu_1+x^\top\beta_1+u_{1c}\right),\qquad u_{1c}\sim\mathcal N(0,\tau_1^2)$$
+$$\Pr(D=2\mid D\ge1,x)=\sigma\!\left(\mu_2+x^\top\beta_2+u_{2c}\right),\qquad u_{2c}\sim\mathcal N(0,\tau_2^2)$$
+$$\Pr(D=2\mid x)=\Pr(D\ge1\mid x)\,\Pr(D=2\mid D\ge1,x)$$</div>
+<p>\(\sigma\) is the logistic function. The product form guarantees the chance of destruction never exceeds the chance of damage. Wind enters as \(\log(V/50)\) with \(V\) in m/s, so each stage is a fragility curve that is logistic in log wind and monotone by construction.</p>
+<h3 id="frag-design">6.2 Design Matrix</h3>
+<p>Categorical attributes are one-hot encoded against a reference level. A level enters only if its evidence grade is supported (section 6.5); other levels are merged into the reference. An unknown value never has its own parameter. It is replaced by the training frequencies of the known levels, so it contributes the average effect:</p>
+<div class="eq">$$x_{j\ell}=\begin{cases}\mathbb 1[\text{value}=\ell] & \text{known}\\ \hat p_{j\ell}=\dfrac{n_{j\ell}}{\sum_{k}n_{jk}} & \text{unknown}\end{cases}$$</div>
+<p>Numeric terms are standardised with the training mean and standard deviation. The table lists every column, reference levels and standardisation constants.</p>
+<div class="scroll-x"><table class="tbl" id="frag-design-t"></table></div>
+<h3 id="frag-est">6.3 Estimation</h3>
+<p>For fixed \(\tau^2\), the coefficients and county effects maximise the penalised log-likelihood, with a ridge penalty \(\lambda=1\) on \(\beta\) and the Gaussian prior on \(u\):</p>
+<div class="eq">$$\ell_p(\mu,\beta,u)=\sum_i\left[y_i\eta_i-\log(1+e^{\eta_i})\right]-\frac{\lambda}{2}\lVert\beta\rVert^2-\frac{1}{2\tau^2}\sum_c u_c^2$$</div>
+<p>It is maximised with L-BFGS-B using the analytic gradient. \(\tau^2\) is then updated by a Laplace-approximate EM step (Breslow and Clayton, 1993) and the cycle repeats until \(\tau^2\) changes by less than \(10^{-4}\), or 15 iterations:</p>
+<div class="eq">$$h_c=\sum_{i\in c}\hat p_i(1-\hat p_i)+\frac{1}{\tau^2},\qquad \tau^2\leftarrow\frac{1}{C}\sum_c\left(\hat u_c^2+h_c^{-1}\right)$$</div>
+<p>Standard errors come from the inverse of the penalised observed information for \((\mu,\beta)\), conditional on the county effects.</p>
+<h3 id="frag-pred">6.4 Prediction</h3>
+<p>For a building whose county effect is unknown (any new location), the probability is averaged over the county distribution with 24-node Gauss-Hermite quadrature:</p>
+<div class="eq">$$\Pr(D\ge1\mid x)=\int\sigma(\eta+u)\,\varphi(u;0,\tau^2)\,du\approx\frac{1}{\sqrt\pi}\sum_{k=1}^{24}w_k\,\sigma\!\left(\eta+\sqrt{2\tau^2}\,z_k\right)$$</div>
+<p>The 80% range shown in the product is \(\sigma(\eta\pm1.2816\,\tau)\). Most of it reflects differences in FEMA's imagery coverage between counties, not the building.</p>
+<h3 id="frag-grade">6.5 Attribute Grading</h3>
+<p>Each attribute level's effect on the chance of damage gets a 90% interval from a bootstrap that resamples 0.1° map tiles with replacement (<span data-k="boot"></span> replicates, county effects refitted each time). A level is <strong>supported</strong> when its interval excludes zero and, if engineering review gives an expected direction, the estimate agrees with it. Otherwise it is <strong>contested</strong>: shown, but merged into the reference in the product.</p>
+<div class="scroll-x"><table class="tbl" id="grades"></table></div>
+<h3 id="frag-params">6.6 Fitted Parameters</h3>
+<p>Final fit on all <span data-k="n_buildings"></span> buildings with the shipped specification. Estimates are on the logit scale per unit of the (standardised) column.</p>
+<h4>Stage 1: Any Visible Damage</h4>
+<div class="scroll-x"><table class="tbl" id="p-any"></table></div>
+<h4>Stage 2: Destroyed Given Damage</h4>
+<div class="scroll-x"><table class="tbl" id="p-des"></table></div>
+<h4>County Effects</h4>
+<div class="scroll-x"><table class="tbl" id="p-county"></table></div>
+</section>
+
+<section id="loss">
+<h2><span class="n">7</span>Household Loss Model</h2>
+<h3 id="loss-pop">7.1 Population and Outcomes</h3>
+<p>The population is owner-occupied primary residences that registered with FEMA's Individuals and Households Program and received an inspection. The model is therefore conditional on registration and inspection, the analogue of a claim severity model. Outcomes:</p>
+<ul>
+<li><strong>Verified loss</strong> \(L\): FEMA-verified real property loss in 2024 dollars. It measures repairs needed to make the home safe, sanitary and functional, which is below a full insured loss.</li>
+<li><strong>Uninhabitable</strong>: FEMA's inspector found habitability repairs were required.</li>
+<li><strong>Destroyed</strong>: FEMA's destroyed flag.</li>
+</ul>
+<h3 id="loss-form">7.2 Model Form</h3>
+<p>A hurdle model for loss, plus two logistic models, each with a partially pooled storm effect \(s\):</p>
+<div class="eq">$$\Pr(L>0\mid x)=\sigma\!\left(\mu_p+x^\top\beta_p+u_{ps}\right)$$
+$$\log L\mid L>0,\,x\sim\mathcal N\!\left(\mu_l+x^\top\beta_l+u_{ls},\ \sigma^2\right),\qquad u_{ls}\sim\mathcal N(0,\tau_l^2)$$
+$$\Pr(\text{uninhabitable}\mid x)=\sigma\!\left(\mu_h+x^\top\beta_h+u_{hs}\right),\qquad \Pr(\text{destroyed}\mid x)=\sigma\!\left(\mu_d+x^\top\beta_d+u_{ds}\right)$$</div>
+<h3 id="loss-features">7.3 Features</h3>
+<p>All models share one design. Wind \(V\) is in m/s and \(k=V/0.514444\) in knots; \(w\) is water above the floor in inches, capped at 120; \(R=\mathbb 1[\text{year}\ge2019]\) is the inspection regime.</p>
+<div class="scroll-x"><table class="tbl" id="loss-feat"></table></div>
+<div class="callout"><b>Why a regime term.</b> At similar winds, FEMA's verified losses are about four times higher from 2019, and the roof-damage flag stops being recorded. That is a change in inspection practice, not in buildings. The regime indicator and its interactions absorb it, and the product predicts with \(R=1\). Adding the interactions cut household CRPS from $3,095 to the value in section 9.</div>
+<h3 id="loss-est">7.4 Estimation</h3>
+<p>The three logistic models are estimated as in section 6.3, with storm in place of county. The severity model is a Gaussian mixed model fitted by EM. Given the storm effects, \(\beta\) solves a ridge-penalised least-squares problem; given \(\beta\), each storm effect is shrunk towards zero; the variances are then updated:</p>
+<div class="eq">$$\hat\beta=\left(X^\top X+\lambda\sigma^2 P\right)^{-1}X^\top(z-u_{s(i)}),\qquad P=\operatorname{diag}(0,1,\dots,1)$$
+$$\hat u_s=\frac{\tau^2}{\tau^2+\sigma^2/n_s}\,\bar r_s,\qquad \tau^2\leftarrow\frac1S\sum_s\left(\hat u_s^2+\left(\frac{n_s}{\sigma^2}+\frac1{\tau^2}\right)^{-1}\right),\qquad \sigma^2\leftarrow\frac1n\sum_i e_i^2$$</div>
+<p>with \(z=\log L\), \(\bar r_s\) the mean residual in storm \(s\), and 30 EM iterations.</p>
+<h3 id="loss-pred">7.5 Predictive Distribution</h3>
+<p>For a new storm the storm effect is unknown. The probability of a positive loss is integrated over \(u_{ps}\) as in section 6.4, and the severity is lognormal with the storm variance added:</p>
+<div class="eq">$$L\sim(1-p)\,\delta_0+p\cdot\text{LogNormal}\!\left(m,\ s^2\right),\qquad s^2=\sigma^2+\tau_l^2$$
+$$Q_L(\alpha\mid L>0)=\exp\!\left(m+s\,\Phi^{-1}(\alpha)\right),\qquad \mathbb E[L\mid L>0]=\exp\!\left(m+\tfrac12s^2\right)$$</div>
+<p>The browser evaluates \(\Phi^{-1}\) with Acklam's rational approximation (relative error below \(1.2\times10^{-9}\)).</p>
+<h3 id="loss-params">7.6 Fitted Parameters</h3>
+<p>Final fit on all <span data-k="n_households"></span> households.</p>
+<h4>Probability of a Positive Verified Loss</h4><div class="scroll-x"><table class="tbl" id="p-pos"></table></div>
+<h4>Log Verified Loss, Given Positive</h4><div class="scroll-x"><table class="tbl" id="p-sev"></table></div>
+<h4>Uninhabitable</h4><div class="scroll-x"><table class="tbl" id="p-unh"></table></div>
+<h4>Destroyed</h4><div class="scroll-x"><table class="tbl" id="p-hdes"></table></div>
+<h4>Storm Effects</h4><div class="scroll-x"><table class="tbl" id="p-storm"></table></div>
+</section>
+
+<section id="combine">
+<h2><span class="n">8</span>Combining the Models</h2>
+<p>For a building with attributes \(x\) at peak wind \(V\), the product reports:</p>
+<div class="eq">$$p_{\text{dmg}}=\Pr(D\ge1\mid x,V),\qquad p_{\text{des}}=\Pr(D=2\mid x,V)$$
+$$\mathbb E[\text{verified loss}]=p_{\text{dmg}}\cdot\mathbb E[L\mid L>0,\,h(x),V]$$</div>
+<p>where \(h(x)\) maps the building to a household profile. The loss part is shown for residential uses only. The habitability probability is reported as it is estimated: for a home that FEMA inspects.</p>
+<div class="scroll-x"><table class="tbl" id="mapping"></table></div>
+<p>In the portfolio desk, each building's wind is the peak of the chosen storm's full track at the building's coordinates. Book totals are sums of expected values. The uninhabitable-and-uninsured count is \(\sum p_{\text{dmg}}\Pr(\text{uninhabitable}\mid\text{inspected})\) over uninsured residential buildings.</p>
+</section>
+
+<section id="validation">
+<h2><span class="n">9</span>Validation</h2>
+<h3 id="val-schemes">9.1 Schemes</h3>
+<ul>
+<li><strong>Fragility, spatial tiles.</strong> The 0.1° tiles are randomly split into 5 folds (seed 7). Each fold is predicted by models fitted to the other four, with county effects known. This tests new neighbourhoods inside assessed counties.</li>
+<li><strong>Fragility, leave one county out.</strong> Each county with at least 1,000 buildings is withheld in turn and predicted with its county effect integrated out. This tests a new assessment area.</li>
+<li><strong>Household loss, leave one storm out.</strong> Each of the <span data-k="n_storms"></span> storms is withheld in turn; models are trained on the rest and scored on up to 20,000 sampled households of the withheld storm (seed 0).</li>
+</ul>
+<h3 id="val-metrics">9.2 Metrics</h3>
+<div class="eq">$$\text{Brier}=\frac1n\sum_i(p_i-y_i)^2,\qquad \text{Log loss}=-\frac1n\sum_i\left[y_i\log p_i+(1-y_i)\log(1-p_i)\right]$$
+$$\text{CRPS}(F,y)=\int_{-\infty}^{\infty}\left(F(z)-\mathbb 1[y\le z]\right)^2dz=2\int_0^1\left(\mathbb 1[y<Q(\alpha)]-\alpha\right)\left(Q(\alpha)-y\right)d\alpha$$</div>
+<p>CRPS is computed from 99 quantiles at \(\alpha=(k-0.5)/99\), the quantile-score form of Gneiting and Ranjan (2011). AUC is the area under the ROC curve. <strong>Share error</strong> is the absolute difference between the mean predicted and observed rates in a fold. <strong>80% coverage</strong> is the share of observations inside the 10th–90th percentile range. For storm-level ranges, the storm effects of the frequency and severity models are set jointly to \(\pm1.2816\,\tau\).</p>
+<h3 id="val-baselines">9.3 Baselines</h3>
+<div class="scroll-x"><table class="tbl" id="baselines"></table></div>
+<p>Gradient boosting never sees an unknown value as a separate signal: unknown categorical fields are replaced by random draws from the known levels of the training data before fitting and scoring.</p>
+<h3 id="val-results">9.4 Results</h3>
+<h4>Fragility</h4><div class="scroll-x"><table class="tbl" id="r-frag"></table></div>
+<h4>Fragility, Withheld Counties</h4><div class="scroll-x"><table class="tbl" id="r-county"></table></div>
+<h4>Household Loss</h4><div class="scroll-x"><table class="tbl" id="r-loss"></table></div>
+<h4>Household Loss by Storm</h4><div class="scroll-x"><table class="tbl" id="r-storm"></table></div>
+</section>
+
+<section id="implementation">
+<h2><span class="n">10</span>Implementation</h2>
+<div class="scroll-x"><table class="tbl" id="modules"></table></div>
+<h3 id="impl-parity">10.1 Browser Engine Parity</h3>
+<p>The website carries its own copy of the wind field and both models in JavaScript. The check below runs that engine in your browser now, against reference values the Python models produced at build time.</p>
+<div class="parity" id="parity"></div>
+<h3 id="impl-repro">10.2 Reproduce</h3>
+<pre>python scripts/fetch_public.py      # HURDAT2, block-group centres, FEMA damage points
+python scripts/fetch_nsi.py         # NSI structures for assessed tiles
+python scripts/fetch_parcels.py     # Florida parcel roll, nine counties
+python scripts/fetch_ihp.py         # OpenFEMA registrations, 19 storms
+python scripts/build_fragility.py
+python scripts/build_loss.py
+python experiments/run_fragility.py
+python experiments/run_loss_validation.py
+python scripts/export_to_web.py
+python scripts/build_site.py
+python tests/test_core.py
+node tests/test_js_parity.js</pre>
+<p>Python 3.11 with numpy, scipy, pandas, scikit-learn, shapely and joblib. Node 18 or later for the parity test.</p>
+</section>
+
+<section id="assumptions">
+<h2><span class="n">11</span>Assumptions and Limitations</h2>
+<div class="scroll-x"><table class="tbl" id="assume"></table></div>
+</section>
+
+<section id="glossary">
+<h2><span class="n">12</span>Glossary</h2>
+<div class="scroll-x"><table class="tbl" id="gloss"></table></div>
+</section>
+
+<section id="references">
+<h2><span class="n">13</span>References</h2>
+<ol id="refs"></ol>
+</section>
+
+</article>
+</div>
+<footer><div class="wrap">HurricaneVuln documentation, <span data-k="version"></span>. Source: <a href="https://github.com/__REPO__">github.com/__REPO__</a>. Independent analysis; not endorsed by NOAA, FEMA, USACE, the Florida Department of Revenue or the U.S. Census Bureau.</div></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+const B = /*__BUNDLE__*/null;
+/*__ENGINE__*/
+/*__DOCS__*/
+</script>
+</body>
+</html>

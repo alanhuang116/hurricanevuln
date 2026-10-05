@@ -180,6 +180,8 @@ class GroupGauss:
             sig2 = float(np.mean(e ** 2))
         self.mu, self.beta = float(b[0]), b[1:]
         self.tau2, self.sigma2 = (tau2 if ng else 0.0), sig2
+        # Conditional covariance of (mu, beta) given the group effects.
+        self.cov = sig2 * np.linalg.pinv(XtX + pen * sig2)
         self.groups = {str(c): float(v) for c, v in zip(codes, u)}
         return self
 
@@ -196,4 +198,5 @@ class GroupGauss:
 
     def to_json(self):
         return {"mu": self.mu, "beta": self.beta.tolist(), "tau2": self.tau2,
-                "sigma2": self.sigma2, "groups": self.groups, "design": self.design.to_json()}
+                "sigma2": self.sigma2, "groups": self.groups, "design": self.design.to_json(),
+                "se": np.sqrt(np.clip(np.diag(self.cov), 0, None)).tolist()}

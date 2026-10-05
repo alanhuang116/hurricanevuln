@@ -50,6 +50,21 @@ def clean(o):
     return o
 
 
+def schema_stats(df, cats, nums):
+    """Per-field summary for the documentation's data dictionary."""
+    out = {}
+    for c in cats:
+        vc = df[c].fillna("missing").astype(str).value_counts()
+        out[c] = {"type": "categorical", "n": int(len(df)),
+                  "levels": [[k, int(v)] for k, v in vc.items()]}
+    for c in nums:
+        x = pd.to_numeric(df[c], errors="coerce")
+        out[c] = {"type": "numeric", "n": int(len(df)), "missing": int(x.isna().sum()),
+                  "mean": r(x.mean()), "sd": r(x.std()), "min": r(x.min()), "p10": r(x.quantile(.1)),
+                  "p50": r(x.quantile(.5)), "p90": r(x.quantile(.9)), "max": r(x.max())}
+    return out
+
+
 def geo_crop(path, tol):
     gj = json.load(open(path))
     clip = box(*BBOX)
@@ -151,6 +166,17 @@ def main():
                                           kt=("wind_ms", lambda s: (s / W.KT).median()),
                                           roof_recorded=("roof", "max")).reset_index()
 
+    raw_frag = pd.read_csv(os.path.join(ROOT, "data", "processed", "fragility.csv"), dtype={"county_fips": str})
+    raw_loss = pd.read_csv(os.path.join(ROOT, "data", "processed", "household_loss.csv"), dtype={"geoid": str})
+    schema = {
+        "fragility": schema_stats(raw_frag, ["event", "construction", "construction_source", "occupancy", "use", "storeys",
+                                             "foundation", "era", "quality", "county_fips", "damage"],
+                                  ["lat", "lon", "sqft", "living_sqft", "year_built", "val_struct", "coastal_v",
+                                   "ground_elv_ft", "wind_ms"]),
+        "loss": schema_stats(raw_loss, ["storm", "state", "residence", "insured", "flood_insured", "flood", "roof",
+                                        "destroyed", "uninhabitable"],
+                             ["year", "lat", "lon", "water_in", "wind_ms", "loss", "roof_loss"]),
+    }
     bundle = {
         "meta": {"built": pd.Timestamp.now().strftime("%Y-%m-%d"), "version": "1.0.0",
                  "n_buildings": int(len(fr)), "n_households": int(len(hl)),
@@ -173,7 +199,7 @@ def main():
         "storm_stats": storm_stats.round(4).replace({np.nan: None}).to_dict("records"),
         "wind_check": wind_check.reset_index().to_dict("records"),
         "qa_fragility": qa_f.to_dict("records"), "qa_loss": qa_l.to_dict("records"),
-        "matching": match, "ihp_counts": ihp_counts,
+        "matching": match, "ihp_counts": ihp_counts, "schema": schema,
         "manifest": {k: {kk: v[kk] for kk in ("url", "retrieved", "sha256", "bytes")} for k, v in manifest.items()
                      if not k.startswith("cenpop")},
     }
