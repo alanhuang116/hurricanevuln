@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HurricaneVuln</title>
+<meta name="description" content="Building-level hurricane vulnerability for insurers and lenders. Calibrated on 130,744 buildings Hurricane Michael passed over and 888,168 FEMA-inspected homes from 19 storms.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#FBFBFD; --bg-alt:#F5F5F7; --card:#FFFFFF; --ink:#1D1D1F; --ink-2:#6E6E73; --ink-3:#86868B;
+  --line:#D2D2D7; --line-2:#E8E8ED; --accent:#0071E3; --accent-ink:#0066CC; --accent-wash:rgba(0,113,227,.08);
+  --good:#1D8A4E; --good-wash:rgba(29,138,78,.1); --warn:#B25E00; --bad:#D70015;
+  --land:#E6E6EB; --ocean:#F3F5F8; --coast:#C2C2C8; --border-st:#D8D8DD; --grid:rgba(29,29,31,.05);
+  --c0:#BFD9F7; --c1:#F3D35B; --c2:#F2A33A; --c3:#EC6A2F; --c4:#D52943; --c5:#8B1D5E;
+  --shadow:0 2px 6px rgba(0,0,0,.04), 0 20px 44px -24px rgba(0,0,0,.22);
+  --radius:22px; --radius-s:12px;
+  --f:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#000000; --bg-alt:#0C0C0E; --card:#161618; --ink:#F5F5F7; --ink-2:#A1A1A6; --ink-3:#8A8A8F;
+    --line:#38383A; --line-2:#262628; --accent:#2997FF; --accent-ink:#4AA8FF; --accent-wash:rgba(41,151,255,.14);
+    --good:#32C26A; --good-wash:rgba(50,194,106,.14); --warn:#FF9F0A; --bad:#FF453A;
+    --land:#1F1F22; --ocean:#0B0C0F; --coast:#3E3E42; --border-st:#2E2E32; --grid:rgba(255,255,255,.05);
+    --c0:#3A6EA8; --c1:#E9C440; --c2:#F2992E; --c3:#F06A30; --c4:#FF4D5E; --c5:#D25AA0;
+    --shadow:0 2px 6px rgba(0,0,0,.4), 0 24px 50px -24px rgba(0,0,0,.9);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#000000; --bg-alt:#0C0C0E; --card:#161618; --ink:#F5F5F7; --ink-2:#A1A1A6; --ink-3:#8A8A8F;
+  --line:#38383A; --line-2:#262628; --accent:#2997FF; --accent-ink:#4AA8FF; --accent-wash:rgba(41,151,255,.14);
+  --good:#32C26A; --good-wash:rgba(50,194,106,.14); --warn:#FF9F0A; --bad:#FF453A;
+  --land:#1F1F22; --ocean:#0B0C0F; --coast:#3E3E42; --border-st:#2E2E32; --grid:rgba(255,255,255,.05);
+  --c0:#3A6EA8; --c1:#E9C440; --c2:#F2992E; --c3:#F06A30; --c4:#FF4D5E; --c5:#D25AA0;
+  --shadow:0 2px 6px rgba(0,0,0,.4), 0 24px 50px -24px rgba(0,0,0,.9);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:56px; -webkit-text-size-adjust:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--f); font-size:17px; line-height:1.5; letter-spacing:-.011em; -webkit-font-smoothing:antialiased; overflow-x:hidden}
+h1,h2,h3,h4{margin:0; font-weight:700; letter-spacing:-.025em; line-height:1.08; text-wrap:balance}
+p{margin:0}
+a{color:var(--accent-ink); text-decoration:none}
+a:hover{text-decoration:underline}
+button,input,select{font-family:inherit}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px; border-radius:6px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--f-mono); font-size:.92em}
+.wrap{max-width:1120px; margin:0 auto; padding-inline:max(20px, env(safe-area-inset-left))}
+.scroll-x{overflow-x:auto; -webkit-overflow-scrolling:touch}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *{transition:none!important; animation:none!important} }
+
+/* nav */
+.nav{position:sticky; top:env(safe-area-inset-top,0px); z-index:100; height:52px; background:color-mix(in srgb, var(--bg) 78%, transparent); backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:saturate(180%) blur(20px); border-bottom:1px solid color-mix(in srgb, var(--line) 60%, transparent)}
+.nav .wrap{display:flex; align-items:center; gap:28px; height:100%}
+.brand{font-weight:600; font-size:19px; letter-spacing:-.02em; color:var(--ink); margin-right:auto; display:flex; align-items:center; gap:9px}
+.brand:hover{text-decoration:none}
+.brand svg{width:20px; height:20px}
+.nav a.nl{font-size:13px; color:var(--ink-2); display:none}
+.nav a.nl:hover{color:var(--ink); text-decoration:none}
+@media(min-width:900px){ .nav a.nl{display:inline} }
+.pillbtn{font-size:13px; font-weight:500; border-radius:980px; padding:5px 12px; border:1px solid var(--line); background:transparent; color:var(--ink-2); cursor:pointer}
+.pillbtn:hover{color:var(--ink); border-color:var(--ink-3)}
+
+/* hero: a deliberately single-look black stage */
+.hero{position:relative; background:#000; color:#F5F5F7; overflow:hidden; min-height:min(92vh, 860px); display:grid; place-items:center; isolation:isolate}
+.hero canvas{position:absolute; inset:0; width:100%; height:100%; z-index:-1}
+.hero-inner{text-align:center; padding:120px 20px 96px; max-width:980px; position:relative}
+.hero-inner::before{content:""; position:absolute; inset:-8% -14%; z-index:-1; background:radial-gradient(closest-side, rgba(0,0,0,.82), rgba(0,0,0,.55) 60%, rgba(0,0,0,0)); pointer-events:none}
+.hero .eyebrow{font-size:19px; font-weight:600; color:#8FC2FF; letter-spacing:-.01em}
+.hero h1{font-size:clamp(46px, 8.2vw, 104px); font-weight:700; letter-spacing:-.045em; line-height:1.0; margin-top:14px; background:linear-gradient(180deg,#FFFFFF 30%, #A9B6C8); -webkit-background-clip:text; background-clip:text; color:transparent}
+.hero .lede{font-size:clamp(19px, 2vw, 24px); color:#A1A1A6; margin:22px auto 0; max-width:720px; line-height:1.4; font-weight:500}
+.hero .lede b{color:#F5F5F7; font-weight:600}
+.cta{display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:34px}
+.btn{display:inline-flex; align-items:center; gap:8px; font-size:17px; font-weight:500; padding:12px 22px; border-radius:980px; border:0; cursor:pointer; text-decoration:none; transition:transform .2s ease, background .2s ease}
+.btn:hover{text-decoration:none; transform:translateY(-1px)}
+.btn.primary{background:#0071E3; color:#fff}
+.btn.primary:hover{background:#0077ED}
+.btn.ghost{background:rgba(255,255,255,.1); color:#F5F5F7; backdrop-filter:blur(10px)}
+.btn.ghost:hover{background:rgba(255,255,255,.16)}
+.btn.light{background:var(--accent); color:#fff}
+.btn.outline{background:transparent; color:var(--accent-ink); border:1px solid var(--accent)}
+.hero-note{position:absolute; bottom:18px; left:0; right:0; text-align:center; font-size:12px; color:#6E6E73}
+
+/* stats band */
+.stats{background:var(--bg); padding:72px 0 24px}
+.stats-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:36px 24px}
+@media(min-width:860px){ .stats-grid{grid-template-columns:repeat(4,minmax(0,1fr))} }
+.stat b{display:block; font-size:clamp(38px,4.6vw,56px); font-weight:700; letter-spacing:-.04em; line-height:1}
+.stat span{display:block; margin-top:10px; color:var(--ink-2); font-size:15px; line-height:1.4; max-width:24ch}
+
+/* sections */
+section.band{padding:clamp(80px, 11vw, 140px) 0}
+section.alt{background:var(--bg-alt)}
+.sh{text-align:center; max-width:820px; margin:0 auto 56px}
+.sh .eyebrow{font-size:17px; font-weight:600; color:var(--accent-ink)}
+.sh h2{font-size:clamp(36px, 5.4vw, 64px); letter-spacing:-.035em; margin-top:10px}
+.sh p{font-size:clamp(18px,1.7vw,21px); color:var(--ink-2); margin-top:18px; line-height:1.45}
+.sh.left{text-align:left; margin-left:0}
+
+/* landfall scrolly */
+.scrolly{position:relative; height:340vh}
+.scrolly-stage{position:sticky; top:52px; height:calc(100vh - 52px); display:grid; align-items:center}
+.scrolly-grid{display:grid; gap:28px; align-items:center}
+@media(min-width:960px){ .scrolly-grid{grid-template-columns:minmax(0,4fr) minmax(0,7fr); gap:56px} }
+.steps{position:relative; min-height:230px}
+.step{position:absolute; inset:0 0 auto 0; opacity:0; transform:translateY(14px); transition:opacity .5s ease, transform .5s ease}
+.step.on{opacity:1; transform:none}
+.step .k{font-size:15px; font-weight:600; color:var(--accent-ink)}
+.step h3{font-size:clamp(28px,3.2vw,40px); margin-top:8px; letter-spacing:-.03em}
+.step p{color:var(--ink-2); font-size:18px; margin-top:14px; line-height:1.5}
+.clock{margin-top:22px; display:flex; gap:22px; flex-wrap:wrap}
+.clock div{display:grid; gap:2px}
+.clock b{font-size:28px; font-weight:600; letter-spacing:-.03em}
+.clock span{font-size:13px; color:var(--ink-3); font-weight:500}
+.mapcard{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; position:relative}
+.mapcard canvas{display:block; width:100%; height:auto}
+.maplegend{position:absolute; left:14px; bottom:12px; display:flex; gap:10px; flex-wrap:wrap; font-size:11.5px; color:var(--ink-2); background:color-mix(in srgb, var(--card) 86%, transparent); backdrop-filter:blur(10px); padding:6px 10px; border-radius:10px}
+.maplegend i{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px}
+.progress{height:3px; background:var(--line-2); border-radius:3px; overflow:hidden; margin-top:26px}
+.progress i{display:block; height:100%; width:0; background:var(--accent)}
+
+/* replay */
+.storms{display:flex; gap:8px; overflow-x:auto; padding:4px 2px 12px; scrollbar-width:none; -webkit-mask-image:linear-gradient(90deg,#000 92%,transparent)}
+.storms::-webkit-scrollbar{display:none}
+.chip{flex:none; font-size:14px; font-weight:500; padding:8px 14px; border-radius:980px; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+.replay{display:grid; gap:24px}
+@media(min-width:960px){ .replay{grid-template-columns:minmax(0,8fr) minmax(0,4fr)} }
+.controls{display:flex; align-items:center; gap:14px; margin-top:14px}
+.play{width:44px; height:44px; border-radius:50%; border:0; background:var(--ink); color:var(--bg); display:grid; place-items:center; cursor:pointer; flex:none}
+.play svg{width:16px; height:16px}
+input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:4px; border-radius:4px; background:var(--line); outline-offset:6px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.3), 0 0 0 .5px rgba(0,0,0,.08); cursor:pointer}
+input[type=range]::-moz-range-thumb{width:22px; height:22px; border-radius:50%; background:#fff; border:0; box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.time{font-size:14px; color:var(--ink-2); min-width:150px; text-align:right}
+.panel{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:24px; display:grid; gap:16px; align-content:start}
+.panel h3{font-size:22px; letter-spacing:-.02em}
+.kv{display:grid; grid-template-columns:1fr auto; gap:10px 16px; font-size:15px}
+.kv dt{color:var(--ink-2)} .kv dd{margin:0; font-weight:600; text-align:right}
+.badge{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; padding:3px 9px; border-radius:980px; background:var(--bg-alt); color:var(--ink-2)}
+.badge i{width:8px; height:8px; border-radius:50%; display:inline-block}
+.hint{font-size:13px; color:var(--ink-3); line-height:1.45}
+
+/* configurator */
+.config{display:grid; gap:28px}
+@media(min-width:960px){ .config{grid-template-columns:minmax(0,7fr) minmax(0,5fr); align-items:start} }
+.opts{display:grid; gap:22px}
+.opt label.t, .opt .t{display:block; font-size:15px; font-weight:600; margin-bottom:10px}
+.seg{display:inline-flex; flex-wrap:wrap; gap:4px; background:var(--bg-alt); padding:4px; border-radius:12px; max-width:100%}
+.seg button{border:0; background:transparent; font-size:14px; font-weight:500; color:var(--ink); padding:8px 13px; border-radius:9px; cursor:pointer; transition:background .2s, box-shadow .2s}
+.seg button[aria-pressed="true"]{background:var(--card); box-shadow:0 1px 3px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.04)}
+.seg button.nc::after{content:" ·"; color:var(--ink-3)}
+.rangebox{display:grid; grid-template-columns:1fr auto; gap:14px; align-items:center}
+.rangebox output{font-size:15px; font-weight:600; min-width:96px; text-align:right}
+.toggle{display:flex; align-items:center; gap:12px; font-size:15px; cursor:pointer}
+.toggle input{appearance:none; -webkit-appearance:none; width:44px; height:26px; border-radius:26px; background:var(--line); position:relative; transition:background .2s; cursor:pointer; flex:none}
+.toggle input::after{content:""; position:absolute; top:2px; left:2px; width:22px; height:22px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:transform .2s}
+.toggle input:checked{background:var(--good)} .toggle input:checked::after{transform:translateX(18px)}
+.result{position:sticky; top:72px}
+.gauges{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.gauge{background:var(--bg-alt); border-radius:16px; padding:16px; display:grid; gap:6px; justify-items:start}
+.gauge svg{width:84px; height:84px}
+.gauge b{font-size:30px; font-weight:700; letter-spacing:-.035em; line-height:1}
+.gauge span{font-size:13px; color:var(--ink-2); line-height:1.35}
+.lossbar{position:relative; height:46px; margin-top:4px}
+.lossbar .track{position:absolute; left:0; right:0; top:20px; height:6px; border-radius:6px; background:var(--line-2)}
+.lossbar .range{position:absolute; top:20px; height:6px; border-radius:6px; background:linear-gradient(90deg, var(--c1), var(--c3))}
+.lossbar .mid{position:absolute; top:13px; width:3px; height:20px; border-radius:2px; background:var(--ink)}
+.lossbar .lab{position:absolute; top:34px; font-size:12px; color:var(--ink-2); transform:translateX(-50%); white-space:nowrap}
+.note{font-size:13px; color:var(--ink-3); line-height:1.45}
+.factor-note{font-size:12.5px; color:var(--ink-3); margin-top:6px}
+
+/* charts */
+.chartcard{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:26px}
+.chartcard h3{font-size:21px; letter-spacing:-.02em}
+.chartcard p.sub{color:var(--ink-2); font-size:15px; margin-top:6px}
+svg text{font-family:var(--f); fill:var(--ink-2)}
+.tip{position:fixed; z-index:1000; pointer-events:none; background:color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); color:var(--ink); font-size:13px; line-height:1.45; padding:9px 12px; border-radius:12px; box-shadow:var(--shadow); border:.5px solid var(--line); max-width:280px}
+.two{display:grid; gap:24px}
+@media(min-width:960px){ .two{grid-template-columns:1fr 1fr} }
+
+/* tables */
+.tbl{width:100%; border-collapse:collapse; font-size:15px}
+.tbl th{font-size:13px; font-weight:600; color:var(--ink-3); text-align:left; padding:10px 12px; border-bottom:1px solid var(--line)}
+.tbl td{padding:12px; border-bottom:1px solid var(--line-2); vertical-align:top}
+.tbl td.n,.tbl th.n{text-align:right; font-variant-numeric:tabular-nums}
+.tbl td.n{white-space:nowrap}
+#pf-table td:first-child{white-space:nowrap}
+.tbl tr.ours td{background:var(--accent-wash)}
+.tbl tr.ours td:first-child{border-radius:10px 0 0 10px} .tbl tr.ours td:last-child{border-radius:0 10px 10px 0}
+.tbl small{color:var(--ink-3); font-size:13px}
+.verdict{display:grid; gap:14px; margin-top:28px}
+@media(min-width:860px){ .verdict{grid-template-columns:1fr 1fr} }
+.verdict div{border-radius:18px; padding:20px 22px; background:var(--card); box-shadow:var(--shadow)}
+.verdict h4{font-size:17px; letter-spacing:-.01em; display:flex; align-items:center; gap:8px}
+.verdict p{color:var(--ink-2); font-size:15px; margin-top:8px; line-height:1.5}
+.dot{width:8px; height:8px; border-radius:50%; display:inline-block}
+
+/* portfolio */
+textarea{width:100%; min-height:220px; font-family:var(--f-mono); font-size:12.5px; line-height:1.55; color:var(--ink); background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; resize:vertical}
+.tiles{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+@media(min-width:760px){ .tiles{grid-template-columns:repeat(4,minmax(0,1fr))} }
+.tilebox{background:var(--card); border-radius:18px; box-shadow:var(--shadow); padding:18px; display:grid; gap:4px}
+.tilebox span{font-size:13px; color:var(--ink-2)}
+.tilebox b{font-size:28px; font-weight:700; letter-spacing:-.035em; line-height:1.1}
+.tilebox small{font-size:12.5px; color:var(--ink-3)}
+.err{color:var(--bad); font-size:14px}
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+.select{font-size:15px; padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink)}
+
+/* records */
+.tabs{display:flex; gap:4px; background:var(--bg-alt); padding:4px; border-radius:12px; overflow-x:auto; scrollbar-width:none; max-width:100%; width:max-content; margin:0 auto 32px}
+.tabs button{border:0; background:transparent; font-size:14px; font-weight:500; padding:8px 14px; border-radius:9px; color:var(--ink); cursor:pointer; white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--card); box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.doc{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:clamp(22px,4vw,44px); display:grid; gap:22px}
+.doc h3{font-size:26px; letter-spacing:-.025em}
+.doc h4{font-size:18px; letter-spacing:-.015em; margin-top:6px}
+.doc p, .doc li{color:var(--ink-2); font-size:16px; line-height:1.6; max-width:76ch}
+.doc ul{margin:0; padding-left:20px; display:grid; gap:6px}
+.doc dl{display:grid; grid-template-columns:minmax(140px,220px) 1fr; gap:10px 22px; margin:0; font-size:15px}
+.doc dt{color:var(--ink-3)} .doc dd{margin:0; color:var(--ink)}
+@media(max-width:620px){ .doc dl{grid-template-columns:1fr} .doc dd{margin-bottom:8px} }
+.reg{display:grid; gap:0; border-top:1px solid var(--line)}
+.reg div{display:grid; gap:4px 20px; padding:14px 0; border-bottom:1px solid var(--line-2)}
+@media(min-width:760px){ .reg div{grid-template-columns:72px 220px 1fr} }
+.reg code{font-family:var(--f-mono); font-size:13px; color:var(--accent-ink)}
+.reg b{font-weight:600} .reg p{color:var(--ink-2); font-size:15px}
+pre.cmd{margin:0; background:var(--bg-alt); border-radius:14px; padding:16px 18px; font-family:var(--f-mono); font-size:13px; line-height:1.7; overflow-x:auto; color:var(--ink)}
+.hash{font-family:var(--f-mono); font-size:11.5px; color:var(--ink-3); word-break:break-all}
+
+footer{border-top:1px solid var(--line); padding:36px 0 56px; color:var(--ink-3); font-size:12.5px; line-height:1.6}
+footer .wrap{display:grid; gap:8px}
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="Sections">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="HurricaneVuln home"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.5c-1.9 0-3.6.6-5 1.6 3.4-.6 6.6.8 7.5 3.7A5.5 5.5 0 0 1 12 17.5c-1.6 0-3-.7-4-1.8.6 3.5 3.3 6 6.7 5.7 1.4-.1 2.7-.6 3.8-1.4-3.4.5-6.4-1-7.2-3.8A5.5 5.5 0 0 1 12 6.5c1.6 0 3 .7 4 1.8C15.4 4.9 13.6 2.5 12 2.5Zm0 7.3a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 0 0 0-4.4Z"/></svg>HurricaneVuln</a>
+    <a class="nl" href="#landfall">Landfall</a>
+    <a class="nl" href="#replay">Storm Replay</a>
+    <a class="nl" href="#building">Building</a>
+    <a class="nl" href="#portfolio">Portfolio</a>
+    <a class="nl" href="#evidence">Evidence</a>
+    <a class="nl" href="#records">Records</a>
+    <button class="pillbtn" id="theme" type="button" aria-label="Switch colour theme">Dark</button>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <canvas id="vortex" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <p class="eyebrow">Hurricane Vulnerability, One Building at a Time</p>
+    <h1>Every building.<br>Every storm.</h1>
+    <p class="lede">HurricaneVuln tells insurers and lenders how a specific building responds to a specific storm. It is calibrated on <b data-k="n_buildings"></b> buildings that Hurricane Michael passed over and <b data-k="n_households"></b> FEMA-inspected homes from <b data-k="n_storms"></b> storms.</p>
+    <div class="cta">
+      <a class="btn primary" href="#replay">Replay a Storm</a>
+      <a class="btn ghost" href="#building">Configure a Building</a>
+    </div>
+  </div>
+  <p class="hero-note">The vortex is drawn from the same wind-field model the product uses.</p>
+</header>
+
+<section class="stats" aria-label="Key figures">
+  <div class="wrap stats-grid">
+    <div class="stat"><b class="num" data-k="n_buildings"></b><span>buildings matched to FEMA remote-sensing damage after Michael</span></div>
+    <div class="stat"><b class="num" data-k="n_households"></b><span>owner-occupied homes with a FEMA inspection, 2016–2024</span></div>
+    <div class="stat"><b class="num" data-k="n_storms"></b><span>storms, each withheld in turn to test the loss model</span></div>
+    <div class="stat"><b class="num" data-k="cov_storms"></b><span>withheld storms whose average loss fell inside our 80% range</span></div>
+  </div>
+</section>
+
+<section id="landfall" aria-label="Hurricane Michael landfall story">
+  <div class="scrolly" id="scrolly">
+    <div class="scrolly-stage">
+      <div class="wrap scrolly-grid">
+        <div>
+          <div class="steps" id="steps">
+            <div class="step" data-at="0"><p class="k">October 9, 2018</p><h3>Michael crosses the Gulf.</h3><p>A tropical storm two days earlier, Michael deepens over warm water at a rate forecasters rarely see.</p></div>
+            <div class="step" data-at="0.34"><p class="k">October 10, 17:30 UTC</p><h3>Landfall at Mexico Beach.</h3><p>Peak sustained winds of 140 knots, the first Category 5 landfall in the contiguous United States since Andrew in 1992.</p></div>
+            <div class="step" data-at="0.62"><p class="k">The next six hours</p><h3>Still a major hurricane, 100 miles inland.</h3><p>The core races north-east into Georgia faster than most storms weaken, which is why inland Jackson and Seminole counties saw damage too.</p></div>
+            <div class="step" data-at="0.84"><p class="k">What FEMA saw from the air</p><h3><span data-k="dmg_share"></span> of buildings damaged.</h3><p>Every orange cell is a 500-metre block of buildings that FEMA's imagery analysts marked as damaged. This is the record HurricaneVuln learns from, building by building.</p></div>
+          </div>
+          <div class="clock">
+            <div><b class="num" id="lf-wind">–</b><span>Max Wind</span></div>
+            <div><b class="num" id="lf-cat">–</b><span>Category</span></div>
+            <div><b class="num" id="lf-time">–</b><span>UTC</span></div>
+          </div>
+          <div class="progress" aria-hidden="true"><i id="lf-prog"></i></div>
+        </div>
+        <div class="mapcard">
+          <canvas id="lfmap" width="1200" height="860" role="img" aria-label="Map of Hurricane Michael's track and peak winds over the Florida Panhandle"></canvas>
+          <div class="maplegend" id="lflegend"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band alt" id="replay">
+  <div class="wrap">
+    <div class="sh">
+      <p class="eyebrow">Storm Replay</p>
+      <h2>Nineteen storms. Your building.</h2>
+      <p>Pick a storm, press play, and watch its wind field build from the official best track. Click anywhere on land to place a building and read the peak wind it would have felt.</p>
+    </div>
+    <div class="storms" id="stormchips" role="group" aria-label="Choose a storm"></div>
+    <div class="replay">
+      <div>
+        <div class="mapcard"><canvas id="rpmap" width="1400" height="900" role="img" aria-label="Wind field replay map; click to place a building"></canvas><div class="maplegend" id="rplegend"></div></div>
+        <div class="controls">
+          <button class="play" id="rp-play" type="button" aria-label="Play"><svg viewBox="0 0 16 16"><path id="rp-icon" fill="currentColor" d="M4 2.5v11l9-5.5z"/></svg></button>
+          <input type="range" id="rp-time" min="0" max="1000" value="1000" aria-label="Replay time">
+          <span class="time num" id="rp-clock"></span>
+        </div>
+      </div>
+      <div class="panel" aria-live="polite">
+        <h3 id="rp-title">–</h3>
+        <dl class="kv">
+          <dt>Peak Intensity</dt><dd class="num" id="rp-peak">–</dd>
+          <dt>Homes in the Loss Record</dt><dd class="num" id="rp-n">–</dd>
+          <dt>Median Verified Loss</dt><dd class="num" id="rp-med">–</dd>
+        </dl>
+        <div style="border-top:1px solid var(--line-2); padding-top:14px">
+          <p class="t" style="font-weight:600; font-size:15px">Your Building</p>
+          <dl class="kv" style="margin-top:10px">
+            <dt>Location</dt><dd class="num" id="pin-loc">Click the map</dd>
+            <dt>Peak Sustained Wind</dt><dd class="num" id="pin-wind">–</dd>
+            <dt>Chance of Visible Damage</dt><dd class="num" id="pin-p">–</dd>
+          </dl>
+          <p class="hint" style="margin-top:12px">The building uses the configuration below. Wind is the peak 1-minute wind at 10 m in open terrain, the same reference as the best track.</p>
+          <a class="btn outline" href="#building" style="margin-top:14px; font-size:15px; padding:9px 16px">Open in the Configurator</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="building">
+  <div class="wrap">
+    <div class="sh">
+      <p class="eyebrow">Building Unit</p>
+      <h2>Configure the building.<br>See what the storm does to it.</h2>
+      <p>Choose what the property record says. Options marked with a dot are recorded in the data but the evidence does not support pricing them separately, so they are scored as the reference option.</p>
+    </div>
+    <div class="config">
+      <div class="opts" id="opts"></div>
+      <div class="result">
+        <div class="panel">
+          <div class="row" style="justify-content:space-between"><h3>Result</h3><span class="badge" id="r-cat"><i></i>–</span></div>
+          <div class="gauges">
+            <div class="gauge"><svg viewBox="0 0 84 84" id="g1" aria-hidden="true"></svg><b class="num" id="r-any">–</b><span>Chance of Visible Damage</span></div>
+            <div class="gauge"><svg viewBox="0 0 84 84" id="g2" aria-hidden="true"></svg><b class="num" id="r-des">–</b><span>Chance Destroyed</span></div>
+          </div>
+          <div id="lossblock">
+            <p style="font-size:15px; font-weight:600">Repair Cost If FEMA Inspects a Damaged Home</p>
+            <div class="lossbar" id="lossbar"></div>
+            <dl class="kv" style="margin-top:6px">
+              <dt>Expected Verified Loss, This Storm</dt><dd class="num" id="r-el">–</dd>
+              <dt>Chance the Home Needs Repairs to Be Habitable</dt><dd class="num" id="r-unh">–</dd>
+            </dl>
+          </div>
+          <p class="note" id="r-range"></p>
+          <p class="note">Repair costs are FEMA-verified real property losses in 2024 dollars under FEMA's current inspection practice. They measure what it takes to make a home safe and habitable, which is below a full insured loss.</p>
+        </div>
+      </div>
+    </div>
+    <div class="two" style="margin-top:56px">
+      <div class="chartcard"><h3>How This Building Responds to Wind</h3><p class="sub">Chance of visible damage from 60 to 160 knots, compared with the typical wood-frame house.</p><div id="curve" style="margin-top:14px"></div></div>
+      <div class="chartcard"><h3>What the Evidence Supports</h3><p class="sub">Effect of each recorded attribute on the odds of damage, with 90% ranges from resampling map tiles.</p><div id="factors" style="margin-top:14px"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="band alt" id="portfolio">
+  <div class="wrap">
+    <div class="sh">
+      <p class="eyebrow">For Insurers and Lenders</p>
+      <h2>Run a storm over your book.</h2>
+      <p>Paste a schedule of buildings with coordinates and values, choose a historical storm, and every building is scored in your browser. Nothing leaves the page. The rows loaded below are examples.</p>
+    </div>
+    <div class="two">
+      <div class="panel">
+        <div class="row"><label for="pf-storm" style="font-weight:600; font-size:15px">Storm</label><select id="pf-storm" class="select"></select></div>
+        <textarea id="pf-csv" spellcheck="false" aria-label="Building schedule CSV"></textarea>
+        <div class="row">
+          <button class="btn light" id="pf-run" type="button">Score the Book</button>
+          <label class="btn outline" for="pf-file" style="cursor:pointer">Upload CSV</label>
+          <input type="file" id="pf-file" accept=".csv,text/csv" hidden>
+          <a class="btn outline" id="pf-dl" href="#" hidden>Download Results</a>
+        </div>
+        <p class="err" id="pf-err" hidden></p>
+        <p class="hint">Columns: id, lat, lon, construction (wood, masonry, concrete, steel, manufactured), use (single_family, mobile_home, condo, multi_family, commercial, industrial, institutional, other), storeys (1, 2, 3), year_built, sqft, value, loan, insured (1 or 0). Blank fields are treated as unknown.</p>
+      </div>
+      <div style="display:grid; gap:16px; align-content:start">
+        <div class="tiles">
+          <div class="tilebox"><span>Buildings</span><b class="num" id="pf-n">–</b><small id="pf-v"></small></div>
+          <div class="tilebox"><span>Expected Damaged</span><b class="num" id="pf-d">–</b><small id="pf-dr"></small></div>
+          <div class="tilebox"><span>Expected Verified Loss</span><b class="num" id="pf-l">–</b><small>Residential units</small></div>
+          <div class="tilebox"><span>Uninhabitable, Uninsured</span><b class="num" id="pf-u">–</b><small>Expected count</small></div>
+        </div>
+        <div class="panel" style="padding:12px 8px"><div class="scroll-x"><table class="tbl" id="pf-table"></table></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="evidence">
+  <div class="wrap">
+    <div class="sh">
+      <p class="eyebrow">Evidence</p>
+      <h2>Tested on what it has not seen.</h2>
+      <p>Two models, two tests. The loss model is scored on each of 19 storms after training on the other 18. The fragility model is scored on map tiles and counties it was not fitted to.</p>
+    </div>
+    <div class="chartcard">
+      <h3>Household Loss, Leave One Storm Out</h3>
+      <p class="sub">Continuous ranked probability score of the full loss distribution in 2024 dollars, mean over withheld storms. Lower is better.</p>
+      <div class="scroll-x" style="margin-top:16px"><table class="tbl" id="ev-loss"></table></div>
+    </div>
+    <div class="two" style="margin-top:24px">
+      <div class="chartcard"><h3>Average Loss per Withheld Storm</h3><p class="sub">Bars are the 80% range predicted before the storm; dots are what FEMA inspectors verified.</p><div id="ev-storms" style="margin-top:14px"></div></div>
+      <div class="chartcard"><h3>Building Fragility, Hurricane Michael</h3><p class="sub">Within assessed counties, new map tiles. Lower Brier and higher AUC are better.</p><div class="scroll-x" style="margin-top:16px"><table class="tbl" id="ev-frag"></table></div><p class="note" style="margin-top:14px" id="ev-county"></p></div>
+    </div>
+    <div class="verdict">
+      <div><h4><span class="dot" style="background:var(--good)"></span>Where HurricaneVuln Leads</h4><p id="win"></p></div>
+      <div><h4><span class="dot" style="background:var(--warn)"></span>Where It Does Not, Yet</h4><p id="lose"></p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band alt" id="records">
+  <div class="wrap">
+    <div class="sh">
+      <p class="eyebrow">Records</p>
+      <h2>Everything on the record.</h2>
+      <p>The model card, where every number came from, what we assumed, and how to rebuild it all. Model risk teams can audit this page end to end.</p>
+    </div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" aria-selected="true" data-tab="card" id="tab-card">Model Card</button>
+      <button role="tab" aria-selected="false" data-tab="lineage" id="tab-lineage">Data Lineage</button>
+      <button role="tab" aria-selected="false" data-tab="assumptions" id="tab-assumptions">Assumptions</button>
+      <button role="tab" aria-selected="false" data-tab="validation" id="tab-validation">Validation Record</button>
+      <button role="tab" aria-selected="false" data-tab="changes" id="tab-changes">Change Log</button>
+      <button role="tab" aria-selected="false" data-tab="reproduce" id="tab-reproduce">Reproduce</button>
+    </div>
+    <div id="docs"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>HurricaneVuln <span data-k="version"></span>, built <span data-k="built"></span>. Code and records: <a href="https://github.com/__REPO__">github.com/__REPO__</a>. Every number on this page is produced by a script in that repository.</p>
+    <p>Sources: NOAA National Hurricane Center HURDAT2; FEMA Historical Geospatial Damage Assessment Database; OpenFEMA Individuals and Households Program registrations; USACE National Structure Inventory; Florida Department of Revenue cadastral roll via the Florida Geographic Information Office; U.S. Census Bureau block-group centres of population; Natural Earth. This is an independent analysis and is not endorsed by any of these agencies.</p>
+  </div>
+</footer>
+<div class="tip" id="tip" hidden></div>
+<script>
+const B = /*__BUNDLE__*/null;
+/*__APP__*/
+</script>
+</body>
+</html>

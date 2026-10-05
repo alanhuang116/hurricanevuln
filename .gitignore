@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+# Raw downloads and record-level tables stay local; rebuild with the fetch scripts.
+data/raw/
+data/processed/*.csv

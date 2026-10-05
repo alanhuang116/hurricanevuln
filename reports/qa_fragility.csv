@@ -1,0 +1,10 @@
+step,records
+NSI structure records in assessed tiles,156313
+FEMA remote-sensing wind damage points,95142
+unique buildings (NSI building id),137685
+Florida parcels on the 2026 roll without a polygon (not joinable),7501
+Florida buildings inside a parcel,111946
+Georgia buildings (no parcel roll; parcel fields unknown),22101
+rebuilt after a damage record: attributes set to unknown,1349
+built 2019 or later with no damage record: removed (not there in 2018),6941
+buildings in fragility table,130744

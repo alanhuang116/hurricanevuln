@@ -1,0 +1,112 @@
+tiles: 110
+  1/110 e Maria tile -673,183: 0
+  2/110 e Maria tile -672,180: 0
+  3/110 e Maria tile -672,182: 0
+  4/110 e Maria tile -672,185: 0
+  5/110 e Maria tile -671,180: 0
+  6/110 e Maria tile -671,181: 0
+  7/110 e Maria tile -671,185: 0
+  8/110 e Maria tile -670,180: 0
+  9/110 e Maria tile -669,180: 0
+  10/110 e Maria tile -669,182: 0
+  11/110 e Maria tile -669,183: 0
+  12/110 e Maria tile -668,179: 0
+  13/110 e Maria tile -668,182: 0
+  14/110 e Maria tile -667,179: 0
+  15/110 e Maria tile -667,181: 0
+  16/110 e Maria tile -667,183: 0
+  17/110 e Maria tile -667,184: 0
+  18/110 e Maria tile -666,180: 0
+  19/110 e Maria tile -666,183: 0
+  20/110 e Maria tile -666,184: 0
+  21/110 e Maria tile -665,179: 0
+  22/110 e Maria tile -664,180: 0
+  23/110 e Maria tile -664,181: 0
+  24/110 e Maria tile -664,182: 0
+  25/110 e Maria tile -664,183: 0
+  26/110 e Maria tile -664,184: 0
+  27/110 e Maria tile -663,180: 0
+  28/110 e Maria tile -663,182: 0
+  29/110 e Maria tile -662,184: 0
+  30/110 e Maria tile -661,183: 0
+  31/110 e Maria tile -661,184: 0
+  32/110 e Maria tile -660,182: 0
+  33/110 e Maria tile -660,183: 0
+  34/110 e Maria tile -659,179: 0
+  35/110 e Maria tile -659,180: 0
+  36/110 e Maria tile -658,180: 0
+  37/110 e Maria tile -658,181: 0
+  38/110 e Maria tile -658,182: 0
+  39/110 e Maria tile -658,183: 0
+  40/110 e Maria tile -658,184: 0
+  41/110 e Maria tile -656,180: 0
+  42/110 e Maria tile -655,181: 0
+  43/110 e Maria tile -649,177: 0
+  44/110 e Maria tile -648,176: 0
+  45/110 e Maria tile -647,177: 0
+  46/110 Michael tile -859,302: 8,373
+  47/110 Michael tile -858,301: 17,562
+  48/110 Michael tile -858,302: 518
+  49/110 Michael tile -857,300: 824
+  50/110 Michael tile -857,301: 20,452
+  51/110 Michael tile -857,302: 16,010
+  52/110 Michael tile -857,303: 1,534
+  53/110 Michael tile -857,304: 1,424
+  54/110 Michael tile -857,305: 1,319
+  55/110 Michael tile -856,301: 9,389
+  56/110 Michael tile -856,302: 5,944
+  57/110 Michael tile -856,303: 2,609
+  58/110 Michael tile -856,304: 282
+  59/110 Michael tile -856,307: 4,141
+  60/110 Michael tile -855,297: 48
+  61/110 Michael tile -855,299: 1,022
+  62/110 Michael tile -855,300: 233
+  63/110 Michael tile -855,301: 380
+  64/110 Michael tile -855,302: 211
+  65/110 Michael tile -855,307: 1,219
+  66/110 Michael tile -855,308: 775
+  67/110 Michael tile -854,296: 507
+  68/110 Michael tile -854,297: 922
+  69/110 Michael tile -854,298: 1,548
+  70/110 Michael tile -854,299: 1,994
+  71/110 Michael tile -854,300: 350
+  72/110 Michael tile -854,306: 1,326
+  73/110 Michael tile -854,307: 1,815
+  74/110 Michael tile -854,308: 589
+  75/110 Michael tile -853,296: 472
+  76/110 Michael tile -853,297: 911
+  77/110 Michael tile -853,298: 1,309
+  78/110 Michael tile -853,305: 547
+  79/110 Michael tile -853,307: 5,101
+  80/110 Michael tile -853,308: 625
+  81/110 Michael tile -852,305: 1,416
+  82/110 Michael tile -852,307: 2,113
+  83/110 Michael tile -852,308: 1,773
+  84/110 Michael tile -851,304: 2,751
+  85/110 Michael tile -851,307: 1,591
+  86/110 Michael tile -851,308: 1,071
+  87/110 Michael tile -850,304: 1,320
+  88/110 Michael tile -850,307: 2,254
+  89/110 Michael tile -850,309: 394
+  90/110 Michael tile -850,310: 837
+  91/110 Michael tile -849,305: 457
+  92/110 Michael tile -849,306: 1,306
+  93/110 Michael tile -849,307: 1,626
+  94/110 Michael tile -849,308: 941
+  95/110 Michael tile -849,309: 458
+  96/110 Michael tile -849,310: 2,366
+  97/110 Michael tile -848,305: 1,401
+  98/110 Michael tile -848,307: 624
+  99/110 Michael tile -848,309: 549
+  100/110 Michael tile -848,310: 411
+  101/110 Michael tile -848,311: 1,540
+  102/110 Michael tile -847,305: 2,102
+  103/110 Michael tile -847,308: 949
+  104/110 Michael tile -847,309: 1,375
+  105/110 Michael tile -847,310: 444
+  106/110 Michael tile -847,311: 386
+  107/110 Michael tile -846,308: 3,295
+  108/110 Michael tile -846,309: 4,493
+  109/110 Michael tile -845,308: 1,030
+  110/110 Michael tile -842,311: 2,755
+structures: 156313

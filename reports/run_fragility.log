@@ -1,0 +1,49 @@
+county folds: 11
+                      any_brier  any_logloss  any_auc  any_share_err  des_brier  des_logloss  des_auc
+scheme model                                                                                         
+county class_curves      0.0952       0.3199   0.5382         0.1225     0.0052       0.0285   0.5803
+       gbm               0.0833       0.3154   0.5359         0.1053     0.0022       0.0169   0.5787
+       hurricanevuln     0.1041       0.3478   0.5408         0.1377     0.0214       0.0794   0.6310
+       wind_only         0.0963       0.3231   0.5192         0.1245     0.0056       0.0298   0.5780
+tiles  class_curves      0.1281       0.4069   0.6706         0.0920     0.0045       0.0277   0.7591
+       gbm               0.1223       0.4002   0.6753         0.0826     0.0039       0.0249   0.7860
+       hurricanevuln     0.1169       0.3773   0.7085         0.0657     0.0041       0.0242   0.7854
+       wind_only         0.1303       0.4126   0.6735         0.0962     0.0045       0.0278   0.7562
+county damage-share 80% coverage: 0.545 over 11 counties
+   county      n    obs   pred   lo80   hi80
+0   12005  67041  0.298  0.062  0.016  0.128
+1   12063  18301  0.111  0.081  0.003  0.231
+2   13087  11625  0.029  0.032  0.001  0.083
+3   12133   6293  0.011  0.039  0.001  0.105
+4   12045   5995  0.105  0.610  0.227  0.920
+5   13253   5653  0.069  0.041  0.002  0.109
+6   12039   5507  0.025  0.121  0.007  0.335
+7   12013   4303  0.059  0.302  0.034  0.698
+8   13205   2559  0.003  0.001  0.000  0.003
+9   13201   2056  0.027  0.009  0.000  0.021
+10  12077   1203  0.019  0.345  0.062  0.714
+                    level  beta_any   lo90   hi90  prior_sign     grade  beta_destroyed_given_damage  n_level
+    construction=concrete     0.115 -0.066  0.204          -1 contested                        0.210     7499
+construction=manufactured     0.416  0.182  0.626           1 supported                        0.323    11339
+     construction=masonry     0.295  0.065  0.387           0 supported                        0.239    36996
+       construction=steel    -0.552 -0.740 -0.425           0 supported                        0.038     6846
+           use=commercial    -0.918 -1.326 -0.579           0 supported                        1.925     6307
+                use=condo    -1.480 -2.186  0.022           0 contested                       -0.464      134
+           use=industrial    -2.119 -2.341 -1.656           0 supported                        1.090     1479
+        use=institutional    -0.344 -2.068  0.348           0 contested                       -0.056     5120
+          use=mobile_home    -0.362 -0.657 -0.040           1 contested                        0.488     8931
+         use=multi_family    -0.014 -0.274  0.236           0 contested                        0.815     3558
+                use=other    -0.308 -0.524 -0.059           0 supported                        1.617    13711
+                storeys=2     0.095  0.023  0.193           0 supported                        0.392    17688
+            storeys=3plus    -0.081 -0.344  0.283           0 contested                        0.765     1900
+            era=1994_2001     0.130 -0.154  0.259          -1 contested                       -0.098    13443
+            era=2002_2009     0.167 -0.219  0.401          -1 contested                       -0.255    11890
+            era=2010_2018    -0.292 -0.872 -0.006          -1 supported                        0.451     6024
+              era=pre1970     0.004 -0.221  0.350           1 contested                        0.202    25232
+             quality=high    -0.061 -0.137  0.108          -1 contested                       -0.273    12870
+              quality=low     0.213 -0.054  0.324           1 contested                        0.740     6083
+      foundation=basement     0.118  0.015  0.195           0 supported                       -0.284     9253
+         foundation=crawl    -0.007 -0.048  0.097           0 contested                        0.144    33885
+          foundation=pier    -0.044 -0.169  0.303           0 contested                        0.455     6837
+          foundation=pile    -0.148 -0.342  0.426           0 contested                        0.198    12458
+    foundation=solid_wall     0.142 -0.098  0.562           0 contested                       -0.488     2998

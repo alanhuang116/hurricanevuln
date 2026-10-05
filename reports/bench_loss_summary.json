@@ -1,0 +1,71 @@
+{
+ "summary": [
+  {
+   "model": "gbm",
+   "crps": 2774.7281736959585,
+   "median_abs_err": 3580.2728858775854,
+   "cov80": 0.8958795447250308,
+   "storms_won": 10
+  },
+  {
+   "model": "hurricanevuln",
+   "crps": 2858.874032914831,
+   "median_abs_err": 3639.0075846258865,
+   "cov80": 0.9067006024971039,
+   "storms_won": 7
+  },
+  {
+   "model": "climatology",
+   "crps": 3319.777748610905,
+   "median_abs_err": 4278.666969162091,
+   "cov80": 0.9145619431329015,
+   "storms_won": 2
+  },
+  {
+   "model": "wind_only",
+   "crps": 3356.4848340495196,
+   "median_abs_err": 4296.618475685352,
+   "cov80": 0.9144739111459497,
+   "storms_won": 0
+  }
+ ],
+ "coverage80": 0.7894736842105263,
+ "binary": [
+  {
+   "model": "gbm",
+   "pos_brier": 0.2053548823091542,
+   "pos_logloss": 0.5909439693407734,
+   "pos_auc": 0.671664126263242,
+   "unh_brier": NaN,
+   "unh_logloss": NaN,
+   "unh_auc": NaN,
+   "des_brier": NaN,
+   "des_logloss": NaN,
+   "des_auc": NaN
+  },
+  {
+   "model": "hurricanevuln",
+   "pos_brier": 0.1999520188712613,
+   "pos_logloss": 0.5769681601883468,
+   "pos_auc": 0.6874562450915355,
+   "unh_brier": 0.1992335528686603,
+   "unh_logloss": 0.5777236525089361,
+   "unh_auc": 0.7054835629586529,
+   "des_brier": 0.005383669321734582,
+   "des_logloss": 0.02869507267419982,
+   "des_auc": 0.7888598001662133
+  },
+  {
+   "model": "wind_only",
+   "pos_brier": 0.23415348980355646,
+   "pos_logloss": 0.661597754938499,
+   "pos_auc": 0.5299011703411516,
+   "unh_brier": NaN,
+   "unh_logloss": NaN,
+   "unh_auc": NaN,
+   "des_brier": NaN,
+   "des_logloss": NaN,
+   "des_auc": NaN
+  }
+ ]
+}
